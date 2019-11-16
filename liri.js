@@ -28,10 +28,10 @@ var liri = {
     },
     'spotify-this-song': function (song) {
         if (!song) song = 'Jopping';
-        spotify.search({type:'track', query: song}, (err,data) => {
-            if(err) return console.log('An error has occured: ' + err);
+        spotify.search({ type: 'track', query: song }, (err, data) => {
+            if (err) return console.log('An error has occured: ' + err);
             var artistNames = new Set();
-            var item = data.track.items[0];
+            var item = data.tracks.items[0];
             var artists = item.artists;
             var songName = item.name;
             var url = item.external_urls.spotify;
@@ -45,18 +45,33 @@ var liri = {
             console.log('Album name: ' + albumName);
         });
     },
+    'movie-this': function (movie) {
+        if (!movie) movie = 'Liar Liar';
+        axios.get('https://www.omdbapi.com/?t=' + movie + '&apikey=trilogy')
+            .then(response => {
+                var data = response.data;
+                var items = ['Title', 'Year', 'Country', 'Language', 'Plot', 'Actors'];
+                items.map(e => {
+                    console.log(e + ': ' + data[e]);
+                });
+                data.Ratings.map(e => console.log(e.Source + ' Rating: ' + e.Value));
+            });
+        },
+        'do-what-it-says': function () {
+            fs.readFile('random.txt', 'utf8', (err, content) => this.runCommand(content));
+        },
 
     runCommand: function (str) {
         var commaIndex = str.indexOf(',');
         var command, param;
-        
+
         if (commaIndex > -1) {
             command = str.slice(0, commaIndex);
             param = str.slice(commaIndex + 1);
         } else command = str;
         console.log(command);
         this[command](param);
-        
+
     }
 }
 liri.runCommand(process.argv.slice(2).join(','));
