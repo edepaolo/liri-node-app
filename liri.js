@@ -2,9 +2,9 @@ require("dotenv").config();
 
 var keys = require("./keys");
 
-// var spotify = new Spotify(keys.spotify);
+var Spotify = require('node-spotify-api');
 
-// var Spotify = require('node-spotify-api');
+var spotify = new Spotify(keys.spotify);
 
 var axios = require('axios');
 
@@ -26,7 +26,26 @@ var liri = {
                 }
             });
     },
-    
+    'spotify-this-song': function (song) {
+        if (!song) song = 'Jopping';
+        spotify.search({type:'track', query: song}, (err,data) => {
+            if(err) return console.log('An error has occured: ' + err);
+            var artistNames = new Set();
+            var item = data.track.items[0];
+            var artists = item.artists;
+            var songName = item.name;
+            var url = item.external_urls.spotify;
+            var albumName = item.album.name;
+            for (var j = 0; j < artists.length; ++j) {
+                artistNames.add(artists[j].name);
+            }
+            console.log('Artists: ' + Array.from(artistNames).join(','));
+            console.log('Name: ' + songName);
+            console.log('Preview link: ' + url);
+            console.log('Album name: ' + albumName);
+        });
+    },
+
     runCommand: function (str) {
         var commaIndex = str.indexOf(',');
         var command, param;
